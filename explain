@@ -1,0 +1,21 @@
+$touch test-area
+$nano test-area 
+$ git add test-area 
+$ git commit -m "create test area"
+$ git checkout -b branch-for-conflict                   #2nd branch
+$ nano test-area                                        #1st change
+$ git commit -a -m "add change A"
+$ git checkout main 
+$ nano test-area                                        #2nd branch
+$ git commit -a -m "add change B"
+$ git merge branch-for-conflict                         #try to merge
+
+merge conflict occured:
+
+Auto-merging test-area
+CONFLICT (content): Merge conflict in test-area
+Automatic merge failed; fix conflicts and then commit the result.
+
+$ nano test-area #solve merge conflict
+$ git commit -a -m "merge into branch 'main' branch 'branch-for-conflict'"
+
