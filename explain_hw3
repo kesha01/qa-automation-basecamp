@@ -1,0 +1,51 @@
+1st:
+
+➜  ~  mkdir -p f1/f2/f3/f4/f5/f6
+➜  ~  nano f1/test-file
+➜  ~  cp f1/test-file f1/f2/f3/f4/f5/f6
+➜  ~  find -name test-file
+./f1/f2/f3/f4/f5/f6/test-file
+./f1/test-file
+➜  ~  rm ./f1/f2/f3/f4/f5/f6/test-file
+
+2-3rd:
+
+➜  ~  cat f1 2> f1/test-file 
+➜  ~  cat f1/test-file 
+cat: f1: Is a directory
+
+➜  ~  cat f1 > f1/f2/f3/f4/f5/f6/test-file 2>&1
+➜  ~  echo success >> f1/f2/f3/f4/f5/f6/test-file 2>&1
+➜  ~  cat f1/f2/f3/f4/f5/f6/test-file 2>&1
+cat: f1: Is a directory
+success
+
+4th:
+
+➜  f1  touch for_root
+➜  f1  sudo chown root for_root 
+➜  f1  sudo chmod +x for_root 
+➜  f1  ls -l
+total 8
+drwxrwxr-x 3 yaroslav yaroslav 4096 Nov  1 21:14 f2
+-rwxrwxr-x 1 root     yaroslav    0 Nov  1 21:27 for_root
+-rw-rw-r-- 1 yaroslav yaroslav   24 Nov  1 21:21 test-file
+
+5-6th:
+
+➜  f1  cat f2 || echo ooops
+cat: f2: Is a directory
+ooops
+
+➜  f1  echo "I am test" > test-file 
+➜  f1  cat test-file && echo "oh yeah"
+I am test
+oh yeah
+
+7th:
+
+➜  f1  touch print-current-folder.sh
+➜  f1  echo "pwd" > print-current-folder.sh 
+➜  f1  chmod +x print-current-folder.sh 
+➜  f1  ./print-current-folder.sh 
+/home/yaroslav/f1
