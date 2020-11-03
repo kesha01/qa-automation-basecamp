@@ -1,0 +1,55 @@
+package groupId;
+
+
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.sql.SQLOutput;
+import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TransferQueue;
+
+public class FirstTest {
+    @Test
+    public void test () throws InterruptedException {
+
+
+        //1st
+        System.setProperty("webdriver.chrome.driver", "/usr/bin/sel/chromedriver");
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.get("https://google.com");
+
+        driver.findElement(By.name("q")).sendKeys("selenium install ubuntu python" + Keys.RETURN);
+        driver.findElement(By.partialLinkText("pypi.org")).click();
+        driver.findElement(By.id("search")).sendKeys("selenium" + Keys.RETURN);
+        driver.findElement(By.xpath("/html/body/main/div/div/div[2]/form/div[3]/ul/li[2]/a/h3/span[1]")).click();
+
+        Thread.sleep(1500);
+
+        //2nd
+
+        driver.get("https://www.globallogic.com/ua/careers/");
+        driver.findElement(By.id("by_keyword")).sendKeys("QA" + Keys.RETURN);
+        WebElement firstResult = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.className("mb-0")));
+        System.out.println(firstResult.getText());
+
+
+
+
+
+
+
+    }
+
+
+}
+
