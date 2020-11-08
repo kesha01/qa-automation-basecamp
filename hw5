@@ -1,0 +1,224 @@
+package groupId;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+
+public class GLTest {
+    public static void main(String[] args) {
+        System.setProperty("webdriver.chrome.driver", "/usr/bin/sel/chromedriver");
+        WebDriver driver = new ChromeDriver();
+        Pypi pypiTask = new Pypi(driver);
+        GLCareersPage glTask = new GLCareersPage(driver);
+
+
+        //first part of HW4
+        firstTest(pypiTask);
+
+        //second part of HW4
+        secondTest(glTask);
+
+
+    }
+
+
+
+
+
+
+    @Test
+    static public void firstTest (Pypi pypi) {
+        pypi.openGoogle();
+        pypi.atGooglePage();
+        pypi.googleSearch("selenium install ubuntu python");
+        pypi.atGoogleSearchPage();
+        pypi.clickOnPypiLink();
+        pypi.atPypiPageSelenium();
+        pypi.pypiSearch("selenium");
+        pypi.atPypiPageSearch();
+        pypi.goToSecondResult();
+        pypi.atPypiSecondResultPage();
+    }
+
+    @Test
+    static public void secondTest (GLCareersPage glCareers) {
+        glCareers.open();
+        glCareers.atGLCareersPage();
+        glCareers.clickOnCookieButton();
+        glCareers.searchVacancy("QA");
+        glCareers.atGLCareersSearchPage();
+        System.out.println(glCareers.getFirstHeader());
+        glCareers.closeBrowser();
+    }
+
+
+}
+
+class BasePage {
+
+    WebDriver driver;
+    public BasePage (WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public WebElement findElement (By locator, int timeOutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds);
+        return wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+    }
+
+    public void click (WebElement button, int timeOutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds);
+        wait.until(ExpectedConditions.elementToBeClickable(button)).click();
+    }
+
+    public void search (WebElement field, String query) {
+        field.clear();
+        field.sendKeys(query + Keys.RETURN);
+    }
+
+    public void closeBrowser () {
+        driver.close();
+    }
+
+}
+
+class Pypi extends BasePage{
+
+    //means task with pypi.org page starting at google.com
+
+    By googleSearchField = By.name("q");
+    By pypi = By.partialLinkText("pypi.org");
+    By pypiSearchField = By.name("q");
+    By secondResult = By.xpath("/html/body/main/div/div/div[2]/form/div[3]/ul/li[2]/a/h3/span[1]");
+
+    public Pypi(WebDriver driver) {
+        super(driver);
+    }
+
+    public void openGoogle () {
+        driver.get("https://www.google.com/");
+    }
+
+
+    public WebElement getGoogleSearchField() {
+        return findElement(googleSearchField, 3);
+    }
+
+    public void googleSearch (String query) {
+        search(getGoogleSearchField(), query);
+    }
+
+    public WebElement getPypiLink() {
+        return findElement(pypi, 4);
+    }
+
+    public void clickOnPypiLink () {
+        click(getPypiLink(), 5);
+    }
+
+    public WebElement getPypiSearchField () {
+        return findElement(pypiSearchField, 3);
+    }
+
+    public void pypiSearch (String query) {
+        search(getPypiSearchField(), query);
+    }
+
+    public WebElement getSecondResult () {
+        return driver.findElement(secondResult);
+    }
+
+    public void goToSecondResult() {
+        click(getSecondResult(), 5);
+    }
+
+    public void atGooglePage () {
+        Assert.assertEquals(driver.getTitle(), "Google");
+    }
+
+    public void atPypiPageSelenium() {
+        Assert.assertEquals(driver.getTitle(), "selenium · PyPI");
+    }
+
+    public void atPypiPageSearch () {
+        Assert.assertEquals(driver.getTitle(), "Search results · PyPI");
+    }
+
+    public void atPypiSecondResultPage () {
+        Assert.assertEquals(driver.getTitle(), "amazon-selenium · PyPI");
+    }
+
+    public void atGoogleSearchPage () {
+        Assert.assertTrue(driver.getTitle().contains(" - Google Search") || driver.getTitle().contains(" - Пошук Google"));
+    }
+
+
+
+
+
+}
+
+
+class GLCareersPage extends BasePage {
+
+    By searchField = By.id("by_keyword");
+    By firstResult = By.className("mb-0");
+    By cookieButton = By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll");
+
+    public GLCareersPage(WebDriver driver) {
+        super(driver);
+    }
+
+    public void open () {
+        driver.get("https://www.globallogic.com/ua/careers/");
+    }
+
+    public WebElement getSearchField () {
+        return findElement(searchField, 4);
+    }
+
+    public void searchVacancy (String query) {
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.elementToBeClickable(searchField));
+        search(getSearchField(), query);
+    }
+    public WebElement getFirstResult () {
+        return findElement(firstResult, 5);
+    }
+
+    public String getFirstHeader () {
+        return getFirstResult().getText();
+    }
+
+    public WebElement getCookieButton () {
+        return findElement(cookieButton, 7);
+    }
+
+    public void clickOnCookieButton () {
+        click(getCookieButton(), 5);
+    }
+
+
+    public void atGLCareersPage () {
+        Assert.assertEquals(driver.getTitle(), "Вакансії / Кар'єра | GlobalLogic Ukraine");
+    }
+
+    public void atGLCareersSearchPage () {
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        Assert.assertEquals(driver.getCurrentUrl(), "https://www.globallogic.com/ua/career-search-page/?keywords=QA&experience=&locations=&c=");
+    }
+
+
+
+
+}
+
+
+
