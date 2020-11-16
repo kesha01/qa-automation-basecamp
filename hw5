@@ -15,15 +15,13 @@ public class GLTest {
     public static void main(String[] args) {
         System.setProperty("webdriver.chrome.driver", "/usr/bin/sel/chromedriver");
         WebDriver driver = new ChromeDriver();
-        Pypi pypiTask = new Pypi(driver);
-        GLCareersPage glTask = new GLCareersPage(driver);
 
 
         //first part of HW4
-        firstTest(pypiTask);
+        firstTest(driver);
 
         //second part of HW4
-        secondTest(glTask);
+        secondTest(driver);
 
 
     }
@@ -34,27 +32,29 @@ public class GLTest {
 
 
     @Test
-    static public void firstTest (Pypi pypi) {
-        pypi.openGoogle();
-        pypi.atGooglePage();
-        pypi.googleSearch("selenium install ubuntu python");
-        pypi.atGoogleSearchPage();
-        pypi.clickOnPypiLink();
-        pypi.atPypiPageSelenium();
-        pypi.pypiSearch("selenium");
-        pypi.atPypiPageSearch();
-        pypi.goToSecondResult();
-        pypi.atPypiSecondResultPage();
+    static public void firstTest (WebDriver driver) {
+        GooglePage google = new GooglePage(driver);
+        google.open();
+        google.atThis();
+        GoogleSearchPage gSearch = google.search("selenium install ubuntu python");
+        gSearch.atThis();
+        PypiPage pypi = gSearch.goToPypiLink();
+        pypi.atThis();
+        PypiSearchPage pypiSearch = pypi.pypiSearch("selenium");
+        pypiSearch.atThis();
+        PypiSecondResultPage pypiSecondResult = pypiSearch.goToSecondResult();
+        pypiSecondResult.atThis();
     }
 
     @Test
-    static public void secondTest (GLCareersPage glCareers) {
+    static public void secondTest (WebDriver driver) {
+        GLCareersPage glCareers = new GLCareersPage(driver);
         glCareers.open();
-        glCareers.atGLCareersPage();
+        glCareers.atThis();
         glCareers.clickOnCookieButton();
-        glCareers.searchVacancy("QA");
-        glCareers.atGLCareersSearchPage();
-        System.out.println(glCareers.getFirstHeader());
+        GLVacanciesPage glVacancies = glCareers.searchVacancy("QA");
+        glVacancies.atThis();
+        System.out.println(glVacancies.getFirstHeader());
         glCareers.closeBrowser();
     }
 
@@ -78,9 +78,17 @@ class BasePage {
         wait.until(ExpectedConditions.elementToBeClickable(button)).click();
     }
 
-    public void search (WebElement field, String query) {
+    public void search (WebElement field, String query) {/*
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.elementToBeClickable(field));*/
         field.clear();
         field.sendKeys(query + Keys.RETURN);
+    }
+
+    public void at (String title) {
+
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        Assert.assertEquals(driver.getTitle(), title);
     }
 
     public void closeBrowser () {
@@ -88,88 +96,148 @@ class BasePage {
     }
 
 }
+interface Page  {
+    public void atThis();
+}
 
-class Pypi extends BasePage{
+class GooglePage extends BasePage implements Page{
 
-    //means task with pypi.org page starting at google.com
-
-    By googleSearchField = By.name("q");
-    By pypi = By.partialLinkText("pypi.org");
-    By pypiSearchField = By.name("q");
-    By secondResult = By.xpath("/html/body/main/div/div/div[2]/form/div[3]/ul/li[2]/a/h3/span[1]");
-
-    public Pypi(WebDriver driver) {
+    public GooglePage(WebDriver driver) {
         super(driver);
     }
 
-    public void openGoogle () {
+    @Override
+    public void atThis() {
+            at("Google");
+
+    }
+
+    public void open () {
         driver.get("https://www.google.com/");
     }
 
+    By searchField = By.name("q");
 
-    public WebElement getGoogleSearchField() {
-        return findElement(googleSearchField, 3);
+
+    public WebElement getSearchField() {
+        return findElement(searchField, 3);
     }
 
-    public void googleSearch (String query) {
-        search(getGoogleSearchField(), query);
+    public GoogleSearchPage search (String query) {
+
+        search(getSearchField(), query);
+        return new GoogleSearchPage(driver);
     }
-
-    public WebElement getPypiLink() {
-        return findElement(pypi, 4);
-    }
-
-    public void clickOnPypiLink () {
-        click(getPypiLink(), 5);
-    }
-
-    public WebElement getPypiSearchField () {
-        return findElement(pypiSearchField, 3);
-    }
-
-    public void pypiSearch (String query) {
-        search(getPypiSearchField(), query);
-    }
-
-    public WebElement getSecondResult () {
-        return driver.findElement(secondResult);
-    }
-
-    public void goToSecondResult() {
-        click(getSecondResult(), 5);
-    }
-
-    public void atGooglePage () {
-        Assert.assertEquals(driver.getTitle(), "Google");
-    }
-
-    public void atPypiPageSelenium() {
-        Assert.assertEquals(driver.getTitle(), "selenium · PyPI");
-    }
-
-    public void atPypiPageSearch () {
-        Assert.assertEquals(driver.getTitle(), "Search results · PyPI");
-    }
-
-    public void atPypiSecondResultPage () {
-        Assert.assertEquals(driver.getTitle(), "amazon-selenium · PyPI");
-    }
-
-    public void atGoogleSearchPage () {
-        Assert.assertTrue(driver.getTitle().contains(" - Google Search") || driver.getTitle().contains(" - Пошук Google"));
-    }
-
-
 
 
 
 }
 
+class GoogleSearchPage extends BasePage implements Page {
 
-class GLCareersPage extends BasePage {
+    public GoogleSearchPage(WebDriver driver) {
+        super(driver);
+    }
 
-    By searchField = By.id("by_keyword");
-    By firstResult = By.className("mb-0");
+    By pypi = By.partialLinkText("pypi.org");
+
+    public WebElement getPypiLink() {
+        return findElement(pypi, 4);
+    }
+
+    public PypiPage goToPypiLink () {
+        click(getPypiLink(), 5);
+        return new PypiPage(driver);
+    }
+
+
+    @Override
+    public void atThis() {
+        Assert.assertTrue(driver.getCurrentUrl().contains("q=selenium+install+ubuntu+python"));
+    }
+}
+
+class PypiSecondResultPage extends  BasePage implements Page {
+
+    public PypiSecondResultPage(WebDriver driver) {
+        super(driver);
+    }
+
+
+    @Override
+    public void atThis() {
+        at("amazon-selenium · PyPI");
+    }
+}
+
+class PypiSearchPage extends BasePage implements Page {
+
+    public PypiSearchPage(WebDriver driver) {
+        super(driver);
+    }
+
+    By secondResult = By.xpath("/html/body/main/div/div/div[2]/form/div[3]/ul/li[2]/a/h3/span[1]");
+    public WebElement getSecondResult () {
+        return driver.findElement(secondResult);
+    }
+
+    public PypiSecondResultPage goToSecondResult() {
+        click(getSecondResult(), 5);
+        return new PypiSecondResultPage(driver);
+    }
+
+    @Override
+    public void atThis() {
+        at("Search results · PyPI");
+    }
+}
+
+
+
+class PypiPage extends BasePage implements Page{
+
+
+    By pypiSearchField = By.name("q");
+
+    public PypiPage(WebDriver driver) {
+        super(driver);
+    }
+
+
+
+
+
+
+
+
+    public WebElement getPypiSearchField () {
+        return findElement(pypiSearchField, 3);
+    }
+
+    public PypiSearchPage pypiSearch (String query) {
+        search(getPypiSearchField(), query);
+        return new PypiSearchPage(driver);
+    }
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public void atThis() {
+        at("selenium · PyPI");
+    }
+}
+
+
+class GLCareersPage extends BasePage implements Page{
+
+    By searchField = By.xpath("/html/body/div[1]/section[1]/div/div/div/div/div/div/div[1]/form/div/div[1]/input");
     By cookieButton = By.id("CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll");
 
     public GLCareersPage(WebDriver driver) {
@@ -181,21 +249,15 @@ class GLCareersPage extends BasePage {
     }
 
     public WebElement getSearchField () {
-        return findElement(searchField, 4);
+        return findElement(searchField, 10);
     }
 
-    public void searchVacancy (String query) {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.elementToBeClickable(searchField));
+    public GLVacanciesPage searchVacancy (String query) {
         search(getSearchField(), query);
-    }
-    public WebElement getFirstResult () {
-        return findElement(firstResult, 5);
+        return new GLVacanciesPage(driver);
     }
 
-    public String getFirstHeader () {
-        return getFirstResult().getText();
-    }
+
 
     public WebElement getCookieButton () {
         return findElement(cookieButton, 7);
@@ -206,18 +268,32 @@ class GLCareersPage extends BasePage {
     }
 
 
-    public void atGLCareersPage () {
-        Assert.assertEquals(driver.getTitle(), "Вакансії / Кар'єра | GlobalLogic Ukraine");
+    @Override
+    public void atThis() {
+        at("Вакансії / Кар'єра | GlobalLogic Ukraine");
+    }
+}
+
+class GLVacanciesPage extends BasePage implements Page{
+
+    public GLVacanciesPage(WebDriver driver) {
+        super(driver);
     }
 
-    public void atGLCareersSearchPage () {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        Assert.assertEquals(driver.getCurrentUrl(), "https://www.globallogic.com/ua/career-search-page/?keywords=QA&experience=&locations=&c=");
+    @Override
+    public void atThis() {
+        Assert.assertTrue(driver.getCurrentUrl().contains("keywords=QA"));
     }
 
 
+    By firstResult = By.className("mb-0");
 
-
+    public WebElement getFirstResult () {
+        return findElement(firstResult, 5);
+    }
+    public String getFirstHeader () {
+        return getFirstResult().getText();
+    }
 }
 
 
