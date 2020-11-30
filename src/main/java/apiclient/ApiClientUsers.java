@@ -27,7 +27,8 @@ public class ApiClientUsers {
 
 
     private static HttpURLConnection userResource (int id) throws IOException {
-        URL url = new URL (userUrl(id));
+
+        URL url = new URL(userUrl(id));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         return connection;
@@ -47,13 +48,17 @@ public class ApiClientUsers {
     }
 
     private static String rawResponse (HttpURLConnection connection) throws IOException {
+        InputStream stream = connection.getErrorStream();
+        if (stream == null) stream = connection.getInputStream();
         String line;
         StringBuilder response = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        while ((line = reader.readLine()) != null) {
-            response.append(line);
-        }
-        reader.close();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+
+
 
         return response.toString();
     }
